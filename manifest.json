@@ -3,23 +3,44 @@
     "description": "Transforming Passive Reading into Active Learning",
     "version": "1.0",
     "manifest_version": 3,
-    "action": { 
-        "default_popup": "popup/popup.html",
-        "default_icon": "images/icon-16.png"
-    },
     "icons": {
+      "16": "images/icon-16.png",
+      "32": "images/icon-32.png",
+      "48": "images/icon-48.png",
+      "128": "images/icon-128.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+      "default_icon": {
         "16": "images/icon-16.png",
         "32": "images/icon-32.png",
         "48": "images/icon-48.png",
         "128": "images/icon-128.png"
+      }
     },
     "content_scripts": [
-    {
-      "js": ["scripts/content.js"],
-      "matches": [
-        "https://developer.chrome.com/docs/extensions/*",
-        "https://developer.chrome.com/docs/webstore/*"
-      ]
+      {
+        "js": ["scripts/content.js"],
+        "matches": [
+          "https://developer.chrome.com/docs/extensions/*",
+          "https://developer.chrome.com/docs/webstore/*"
+        ],
+        "description": "Calculate the Reading time of in every page"
+      }
+    ],
+    "permissions": [
+      "activeTab",
+      "scripting"
+    ],
+    "commands": {
+      "_execute_action": {
+        "suggested_key": {
+            "default": "Ctrl+B",
+            "mac": "Command+B"  
+        },
+        "description": "Shortcut to start the Interactive Essay Reader"
+      }
     }
-  ]
 }

@@ -23,16 +23,17 @@
     "content_scripts": [
       {
         "js": ["scripts/content.js"],
-        "matches": [
-          "https://developer.chrome.com/docs/extensions/*",
-          "https://developer.chrome.com/docs/webstore/*"
-        ],
-        "description": "Calculate the Reading time of in every page"
+        "matches": ["<all_urls>"],
+        "run_at": "document_idle",
+        "description": "Estimate the reading time of the page"
       }
     ],
     "permissions": [
       "activeTab",
       "scripting"
+    ],
+    "host_permissions": [
+      "<all_urls>"
     ],
     "commands": {
       "_execute_action": {
@@ -40,7 +41,7 @@
             "default": "Ctrl+B",
             "mac": "Command+B"  
         },
-        "description": "Shortcut to start the Interactive Essay Reader"
+        "description": "Shortcut to start the Interactive Essay Reader: Chunk paragraphs, add countdown timers, text fade out"
       }
     }
 }

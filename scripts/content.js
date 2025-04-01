@@ -59,10 +59,44 @@ function addTimersToParagraphs() {
 
         // Append the timer and paragraph to the wrapper
         wrapper.appendChild(timer);
-        wrapper.appendChild(paragraph.cloneNode(true)); // Clone the paragraph to avoid moving it
+
+        // Create a new paragraph element to hold the splitting text
+        const newParagraph = document.createElement("p");
+
+        // Wrap each word in a <span> and append it back to the paragraph
+        const text = paragraph.textContent;
+        text.split(" ").forEach((word) => {
+            const span = document.createElement("span");
+            span.textContent = word + " "; // Add a space after each word
+            span.style.display = "inline-block";
+            span.style.transition = "opacity 0.5s ease";
+            span.style.whiteSpace = "pre"; // Preserve the whitespace
+            newParagraph.appendChild(span);
+        });
+
+        // Append the new paragraph to the wrapper
+        wrapper.appendChild(newParagraph);
 
         // Replace the original paragraph with the wrapper
         paragraph.replaceWith(wrapper);
+
+        // Add an event listener to fade out the word when hovered
+        newParagraph.addEventListener("mouseover", (event) => {
+            const target = event.target;
+            if (target.tagName === "SPAN") {
+                const fadeTimeout = setTimeout(() => {
+                    target.style.opacity = "0"; // Fade out the word after 120ms
+                }, 120); 
+
+                target.addEventListener(
+                    "mouseleave",
+                    () => {
+                        clearTimeout(fadeTimeout); // Cancel the fade-out
+                    },
+                    { once: true }
+                );
+            }
+        });
 
         // Add an event listener to start the timer when the user interacts with the paragraph
         let timeLeft = readingTime;
@@ -79,7 +113,7 @@ function addTimersToParagraphs() {
                         timer.textContent = "Time's up!";
                     }
                 }, 1000);
-}
+            }
         });
 
         // Stop the timer if the user leaves the paragraph

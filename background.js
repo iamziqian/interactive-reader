@@ -44,10 +44,19 @@ function addTimersToParagraphs() {
     
     function createWrapper() {
         const wrapper = document.createElement("div");
+        wrapper.style.position = "fixed";
+        wrapper.style.top = "50%";
+        wrapper.style.left = "50%";
+        wrapper.style.transform = "translate(-50%, -50%)"; // Center the wrapper
+
         wrapper.style.marginBottom = "20px";
         wrapper.style.border = "1px solid #ccc";
-        wrapper.style.padding = "10px";
+        wrapper.style.padding = "20px";
         wrapper.style.borderRadius = "5px";
+        wrapper.style.backgroundColor = "lightblue";
+        wrapper.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)"; // Add a shadow for better visibility
+        wrapper.style.zIndex = "1000"; // Ensure it appears above other elements
+        wrapper.style.display = "none"; // Initially hidden
         wrapper.setAttribute("data-original-content-wrapper", "true"); // Add attribute to identify the wrapper
         return wrapper;
     }
@@ -55,7 +64,6 @@ function addTimersToParagraphs() {
     function createTimer(readingTime) {
         const timer = document.createElement("div");
         timer.style.fontSize = "14px";
-        timer.style.color = "#555";
         timer.style.marginBottom = "10px";
         timer.textContent = `Time left: ${readingTime} seconds`;
         return timer;
@@ -77,6 +85,7 @@ function addTimersToParagraphs() {
                 if (target.tagName === "SPAN") {
                     const fadeTimeout = setTimeout(() => {
                         target.style.opacity = "0"; // Fade out the word after 120ms
+                        // target.text.decoration = line-through;
                     }, 120);
     
                     target.addEventListener(
@@ -123,6 +132,8 @@ function addTimersToParagraphs() {
 
     // Main logic to add timers to paragraphs
     const paragraphs = document.querySelectorAll("p");
+    const wrappers = []; // Store all wrappers
+    let currentIndex = 0; // Track the current wrapper
 
     paragraphs.forEach((paragraph) => {
         // Skip paragraphs that are already wrapped
@@ -134,9 +145,6 @@ function addTimersToParagraphs() {
         if (paragraph.classList.contains("color-secondary-text") && paragraph.classList.contains("type--caption")) {
             return;
         }
-
-        // Store the original content
-        paragraph.setAttribute("data-original-content", paragraph.innerHTML);
     
         // Calculate the word count for the paragraph
         const wordCount = getWordCount(paragraph.textContent);
@@ -145,25 +153,46 @@ function addTimersToParagraphs() {
         // Calculate recommended reading time (in seconds)
         const readingTime = Math.ceil(wordCount / (200 / 60)); // 200 words per minute
 
-        // Create a wrapper div for the paragraph and timer
+        // Create the wrapper, timer, and interactive paragraph
         const wrapper = createWrapper();
-
-        // Create a timer element
         const timer = createTimer(readingTime);
+        const newParagraph = createInteractiveParagraph(paragraph.textContent);
 
         // Append the timer and paragraph to the wrapper
         wrapper.appendChild(timer);
-
-        // Create a new paragraph element to hold the splitting text
-        const newParagraph = createInteractiveParagraph(paragraph.textContent);
-
-        // Append the new paragraph to the wrapper
         wrapper.appendChild(newParagraph);
 
-        // Replace the original paragraph with the wrapper
-        paragraph.replaceWith(wrapper);
-
-        handleTimer(readingTime, wrapper, timer);
+        document.body.appendChild(wrapper); // Append the wrapper to the body
+        wrappers.push({wrapper, timer, readingTime}); // Store the wrapper
     });
+
+    if (wrappers.length > 0) {
+        function showNextWrapper() {
+            if (currentIndex >= wrappers.length) {
+                return; // Stop condition
+            }
+    
+            const moveToNextWrapper = () => {
+                wrapper.style.display = "none"; // Hide the current wrapper
+                currentIndex++;
+                document.removeEventListener("keydown", handleKeydown);
+                showNextWrapper(); // Show the next wrapper
+            };
+    
+            const handleKeydown = (event) => {
+                if (event.key === "Enter") {
+                    moveToNextWrapper();
+                }
+            }
+
+            const { wrapper, timer, readingTime } = wrappers[currentIndex];
+            wrapper.style.display = "block"; // Show the current wrapper
+            document.addEventListener("keydown", handleKeydown);
+    
+            handleTimer(readingTime, wrapper, timer);
+        }
+
+        showNextWrapper();
+    }
 }
 
